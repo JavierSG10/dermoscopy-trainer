@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#123f73" />
+  <meta name="description" content="Crea y comparte los datos de una recogida en coche." />
+  <title>Ven a buscarnos</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #123f73;
+      --blue: #2878c8;
+      --sky: #eaf4ff;
+      --ink: #17253a;
+      --muted: #64748b;
+      --line: #d8e3ef;
+      --surface: rgba(255,255,255,.94);
+      --success: #16794e;
+      --danger: #b42318;
+      --shadow: 0 22px 55px rgba(18,63,115,.18);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(91,166,236,.36), transparent 30rem),
+        radial-gradient(circle at 92% 92%, rgba(18,63,115,.2), transparent 28rem),
+        linear-gradient(145deg, #f8fbff 0%, #eaf4ff 48%, #dcecff 100%);
+      padding: max(22px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+    }
+    button, input, textarea { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    .shell { width: min(100%, 620px); margin: 0 auto; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 2px 4px 18px;
+      color: var(--navy);
+      font-weight: 850;
+      letter-spacing: -.02em;
+    }
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, var(--navy), var(--blue));
+      box-shadow: 0 12px 30px rgba(18,63,115,.24);
+      color: white;
+      font-size: 24px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.72);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+    .hero {
+      padding: 28px 24px 22px;
+      background: linear-gradient(145deg, rgba(18,63,115,.98), rgba(40,120,200,.92));
+      color: white;
+      position: relative;
+      isolation: isolate;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      right: -60px;
+      top: -70px;
+      border-radius: 50%;
+      border: 34px solid rgba(255,255,255,.08);
+      z-index: -1;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      font-size: .78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+    h1 {
+      margin: 15px 0 8px;
+      font-size: clamp(2rem, 8vw, 3.2rem);
+      line-height: .98;
+      letter-spacing: -.05em;
+    }
+    .hero p {
+      margin: 0;
+      max-width: 42ch;
+      color: rgba(255,255,255,.86);
+      line-height: 1.5;
+    }
+    .content { padding: 24px; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+    label {
+      display: block;
+      font-size: .86rem;
+      font-weight: 800;
+      color: #334155;
+      margin: 0 0 7px 2px;
+    }
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      padding: 14px 14px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    textarea { min-height: 88px; resize: vertical; }
+    input:focus, textarea:focus {
+      border-color: #4d97dc;
+      box-shadow: 0 0 0 4px rgba(40,120,200,.13);
+    }
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 9px;
+      align-items: stretch;
+    }
+    .button {
+      border: 0;
+      border-radius: 15px;
+      min-height: 50px;
+      padding: 12px 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      text-decoration: none;
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform .14s ease, filter .14s ease, box-shadow .14s ease;
+    }
+    .button:active { transform: translateY(1px) scale(.99); }
+    .button:hover { filter: brightness(1.03); }
+    .button-primary {
+      width: 100%;
+      color: white;
+      background: linear-gradient(145deg, var(--navy), var(--blue));
+      box-shadow: 0 14px 28px rgba(18,63,115,.22);
+    }
+    .button-secondary {
+      color: var(--navy);
+      background: var(--sky);
+      border: 1px solid #cfe4f8;
+    }
+    .button-ghost {
+      color: #38506d;
+      background: #f5f8fb;
+      border: 1px solid #e1e8ef;
+    }
+    .button-green {
+      color: white;
+      background: linear-gradient(145deg, #16794e, #20a76b);
+      box-shadow: 0 14px 28px rgba(22,121,78,.18);
+    }
+    .helper {
+      margin: 8px 2px 0;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.45;
+    }
+    .status {
+      display: none;
+      margin: 14px 0 0;
+      padding: 12px 14px;
+      border-radius: 13px;
+      font-size: .86rem;
+      font-weight: 750;
+    }
+    .status.show { display: block; }
+    .status.ok { color: var(--success); background: #eaf8f1; }
+    .status.error { color: var(--danger); background: #fff0ee; }
+    .viewer { display: none; }
+    body.is-viewer .creator { display: none; }
+    body.is-viewer .viewer { display: block; }
+    .pickup-summary { padding: 0; overflow: hidden; }
+    .pickup-top {
+      padding: 28px 24px 24px;
+      color: white;
+      background: linear-gradient(145deg, #123f73, #2878c8);
+      position: relative;
+    }
+    .pickup-icon {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      border-radius: 21px;
+      background: rgba(255,255,255,.14);
+      font-size: 34px;
+      margin-bottom: 18px;
+    }
+    .pickup-top h1 { margin: 0 0 9px; }
+    .pickup-top p { margin: 0; color: rgba(255,255,255,.85); }
+    .countdown {
+      margin-top: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.14);
+      font-weight: 800;
+      font-size: .9rem;
+    }
+    .details { padding: 23px; }
+    .detail {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 14px;
+      padding: 15px 0;
+      border-bottom: 1px solid #e7edf3;
+    }
+    .detail:first-child { padding-top: 0; }
+    .detail:last-of-type { border-bottom: 0; }
+    .detail-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: var(--sky);
+      color: var(--navy);
+      font-size: 23px;
+    }
+    .detail-label {
+      display: block;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 4px;
+    }
+    .detail-value {
+      font-size: 1.12rem;
+      line-height: 1.35;
+      font-weight: 850;
+      overflow-wrap: anywhere;
+    }
+    .detail-subvalue {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+    .actions { display: grid; gap: 10px; margin-top: 18px; }
+    .actions.two { grid-template-columns: 1fr 1fr; }
+    .mini-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: .75rem;
+      margin: 16px 8px 0;
+      line-height: 1.45;
+    }
+    .hidden { display: none !important; }
+    @media (max-width: 520px) {
+      .grid, .actions.two, .mini-actions { grid-template-columns: 1fr; }
+      .card { border-radius: 23px; }
+      .hero, .content, .pickup-top, .details { padding-left: 19px; padding-right: 19px; }
+      .input-row { grid-template-columns: 1fr; }
+      .input-row .button { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">🚙</div>
+      <div>Ven a buscarnos</div>
+    </div>
+    <section class="card creator" aria-labelledby="creator-title">
+      <header class="hero">
+        <span class="eyebrow">📍 Recogida en coche</span>
+        <h1 id="creator-title">¿Dónde y cuándo?</h1>
+        <p>Rellena los datos y comparte el enlace. Al abrirlo, verá la hora, el lugar y un botón directo al mapa.</p>
+      </header>
+      <form class="content" id="pickup-form">
+        <div class="grid">
+          <div class="field">
+            <label for="date">Día</label>
+            <input id="date" name="date" type="date" required />
+          </div>
+          <div class="field">
+            <label for="time">Hora</label>
+            <input id="time" name="time" type="time" required />
+          </div>
+        </div>
+        <div class="field">
+          <label for="place">Lugar de recogida</label>
+          <input id="place" name="place" type="text" autocomplete="street-address" placeholder="Ej.: puerta principal del hospital" required maxlength="100" />
+          <p class="helper">Pon un nombre fácil de reconocer. Debajo puedes añadir la dirección exacta.</p>
+        </div>
+        <div class="field">
+          <label for="address">Dirección o referencia para el mapa</label>
+          <div class="input-row">
+            <input id="address" name="address" type="text" autocomplete="street-address" placeholder="Calle, número, ciudad…" maxlength="180" />
+            <button type="button" class="button button-secondary" id="location-button">📍 Mi ubicación</button>
+          </div>
+          <p class="helper" id="location-help">La ubicación solo se incorpora al enlace que tú compartas.</p>
+        </div>
+        <div class="field">
+          <label for="note">Indicaciones opcionales</label>
+          <textarea id="note" name="note" placeholder="Ej.: estaremos junto a la parada de taxis" maxlength="220"></textarea>
+        </div>
+        <div class="grid">
+          <div class="field">
+            <label for="from">¿A quién recoge?</label>
+            <input id="from" name="from" type="text" placeholder="Ej.: Javier y Laura" maxlength="60" />
+          </div>
+          <div class="field">
+            <label for="phone">Teléfono para avisar</label>
+            <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ej.: 600 000 000" maxlength="24" />
+          </div>
+        </div>
+        <input type="hidden" id="latitude" />
+        <input type="hidden" id="longitude" />
+        <button class="button button-primary" type="submit">🔗 Crear enlace de recogida</button>
+        <div class="status" id="form-status" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+    <section class="card viewer pickup-summary" aria-labelledby="viewer-title">
+      <header class="pickup-top">
+        <div class="pickup-icon" aria-hidden="true">🚗</div>
+        <h1 id="viewer-title">Ven a buscarnos</h1>
+        <p id="viewer-subtitle">Te esperamos para la recogida.</p>
+        <div class="countdown" id="countdown">⏳ Calculando…</div>
+      </header>
+      <div class="details">
+        <div class="detail">
+          <div class="detail-icon" aria-hidden="true">🕒</div>
+          <div>
+            <span class="detail-label">Hora</span>
+            <span class="detail-value" id="view-time"></span>
+            <span class="detail-subvalue" id="view-date"></span>
+          </div>
+        </div>
+        <div class="detail">
+          <div class="detail-icon" aria-hidden="true">📍</div>
+          <div>
+            <span class="detail-label">Lugar de recogida</span>
+            <span class="detail-value" id="view-place"></span>
+            <span class="detail-subvalue" id="view-address"></span>
+          </div>
+        </div>
+        <div class="detail hidden" id="note-detail">
+          <div class="detail-icon" aria-hidden="true">💬</div>
+          <div>
+            <span class="detail-label">Indicaciones</span>
+            <span class="detail-value" id="view-note"></span>
+          </div>
+        </div>
+        <div class="actions two">
+          <a class="button button-primary" id="google-maps" href="#" target="_blank" rel="noopener">🗺️ Google Maps</a>
+          <a class="button button-secondary" id="apple-maps" href="#" target="_blank" rel="noopener"> Apple Maps</a>
+        </div>
+        <div class="mini-actions">
+          <a class="button button-green hidden" id="whatsapp-button" href="#" target="_blank" rel="noopener">✅ Voy de camino</a>
+          <a class="button button-ghost hidden" id="call-button" href="#">📞 Llamar</a>
+        </div>
+        <div class="actions">
+          <button class="button button-ghost" id="share-view" type="button">↗️ Compartir esta recogida</button>
+          <button class="button button-ghost" id="new-pickup" type="button">＋ Crear otra recogida</button>
+        </div>
+      </div>
+    </section>
+    <p class="footer-note">Los datos no se guardan en una base de datos: viajan dentro del enlace que compartes.</p>
+  </main>
+  <script>
+    (() => {
+      'use strict';
+      const $ = (selector) => document.querySelector(selector);
+      const params = new URLSearchParams(window.location.search);
+      const form = $('#pickup-form');
+      const status = $('#form-status');
+      const dateInput = $('#date');
+      const timeInput = $('#time');
+      const latInput = $('#latitude');
+      const lonInput = $('#longitude');
+      const locationHelp = $('#location-help');
+      const pad = (value) => String(value).padStart(2, '0');
+      function localDateString(date) {
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+      }
+      function setDefaults() {
+        const now = new Date();
+        const later = new Date(now.getTime() + 60 * 60 * 1000);
+        dateInput.value = localDateString(later);
+        timeInput.value = `${pad(later.getHours())}:${pad(later.getMinutes())}`;
+      }
+      function showStatus(message, type = 'ok') {
+        status.textContent = message;
+        status.className = `status show ${type}`;
+      }
+      function canonicalBase() {
+        return `${window.location.origin}${window.location.pathname}`;
+      }
+      async function shareLink(url, title = 'Recogida en coche') {
+        const shareData = { title, text: 'Aquí tienes la hora y el lugar de recogida.', url };
+        if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+          await navigator.share(shareData);
+          return 'shared';
+        }
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(url);
+          return 'copied';
+        }
+        window.prompt('Copia este enlace:', url);
+        return 'prompt';
+      }
+      $('#location-button').addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          showStatus('Este dispositivo no permite obtener la ubicación. Puedes escribir la dirección manualmente.', 'error');
+          return;
+        }
+        const button = $('#location-button');
+        button.disabled = true;
+        button.textContent = 'Localizando…';
+        locationHelp.textContent = 'Esperando la ubicación del teléfono…';
+        navigator.geolocation.getCurrentPosition(
+          ({ coords }) => {
+            latInput.value = coords.latitude.toFixed(6);
+            lonInput.value = coords.longitude.toFixed(6);
+            if (!$('#address').value.trim()) {
+              $('#address').value = 'Ubicación exacta compartida desde el teléfono';
+            }
+            locationHelp.textContent = '✓ Ubicación exacta añadida al enlace.';
+            button.textContent = '✓ Ubicación añadida';
+            button.disabled = false;
+          },
+          (error) => {
+            const message = error.code === 1
+              ? 'No se concedió permiso de ubicación. Escribe la dirección manualmente.'
+              : 'No se pudo obtener la ubicación. Escribe la dirección manualmente.';
+            locationHelp.textContent = message;
+            button.textContent = '📍 Mi ubicación';
+            button.disabled = false;
+          },
+          { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+        );
+      });
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        const values = {
+          d: dateInput.value,
+          t: timeInput.value,
+          p: $('#place').value.trim(),
+          a: $('#address').value.trim(),
+          n: $('#note').value.trim(),
+          f: $('#from').value.trim(),
+          ph: $('#phone').value.trim(),
+          lat: latInput.value,
+          lon: lonInput.value
+        };
+        const query = new URLSearchParams();
+        Object.entries(values).forEach(([key, value]) => {
+          if (value) query.set(key, value);
+        });
+        const url = `${canonicalBase()}?${query.toString()}`;
+        try {
+          const result = await shareLink(url);
+          if (result === 'copied') showStatus('Enlace copiado. Ya puedes pegarlo en WhatsApp.');
+          if (result === 'shared') showStatus('Enlace listo para compartir.');
+          if (result === 'prompt') showStatus('Copia el enlace mostrado y envíalo.');
+        } catch (error) {
+          if (error && error.name === 'AbortError') return;
+          showStatus('No se pudo compartir automáticamente. Mantén pulsado el enlace de la barra del navegador para copiarlo.', 'error');
+        }
+      });
+      function digitsOnly(phone) {
+        let digits = String(phone || '').replace(/\D/g, '');
+        if (digits.length === 9 && /^[6789]/.test(digits)) digits = `34${digits}`;
+        return digits;
+      }
+      function formatPickupDate(dateString) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return new Intl.DateTimeFormat('es-ES', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+        }).format(date);
+      }
+      function pickupDateTime(dateString, timeString) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        const [hour, minute] = timeString.split(':').map(Number);
+        return new Date(year, month - 1, day, hour, minute, 0, 0);
+      }
+      function updateCountdown(target) {
+        const element = $('#countdown');
+        const render = () => {
+          const diff = target.getTime() - Date.now();
+          const absoluteMinutes = Math.floor(Math.abs(diff) / 60000);
+          if (diff < -60 * 60 * 1000) {
+            element.textContent = '✓ La hora de recogida ya pasó';
+            return;
+          }
+          if (diff <= 0) {
+            element.textContent = '🚗 Es la hora de recogida';
+            return;
+          }
+          const days = Math.floor(absoluteMinutes / 1440);
+          const hours = Math.floor((absoluteMinutes % 1440) / 60);
+          const minutes = absoluteMinutes % 60;
+          const parts = [];
+          if (days) parts.push(`${days} d`);
+          if (hours) parts.push(`${hours} h`);
+          parts.push(`${minutes} min`);
+          element.textContent = `⏳ Faltan ${parts.join(' ')}`;
+        };
+        render();
+        window.setInterval(render, 30000);
+      }
+      function buildMapLinks(place, address, lat, lon) {
+        const textQuery = address || place;
+        const hasCoords = Number.isFinite(Number(lat)) && Number.isFinite(Number(lon)) && lat !== '' && lon !== '';
+        const googleQuery = hasCoords ? `${lat},${lon}` : textQuery;
+        const appleUrl = hasCoords
+          ? `https://maps.apple.com/?ll=${encodeURIComponent(`${lat},${lon}`)}&q=${encodeURIComponent(place)}`
+          : `https://maps.apple.com/?q=${encodeURIComponent(textQuery)}`;
+        $('#google-maps').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(googleQuery)}`;
+        $('#apple-maps').href = appleUrl;
+      }
+      function renderViewer() {
+        const date = params.get('d');
+        const time = params.get('t');
+        const place = params.get('p');
+        if (!date || !time || !place) {
+          setDefaults();
+          return;
+        }
+        document.body.classList.add('is-viewer');
+        const address = params.get('a') || '';
+        const note = params.get('n') || '';
+        const from = params.get('f') || '';
+        const phone = params.get('ph') || '';
+        const lat = params.get('lat') || '';
+        const lon = params.get('lon') || '';
+        const target = pickupDateTime(date, time);
+        $('#viewer-title').textContent = from ? `Recogida de ${from}` : 'Ven a buscarnos';
+        $('#viewer-subtitle').textContent = 'Aquí tienes todos los datos para llegar sin complicaciones.';
+        $('#view-time').textContent = `${time} h`;
+        $('#view-date').textContent = formatPickupDate(date);
+        $('#view-place').textContent = place;
+        $('#view-address').textContent = address || (lat && lon ? 'Ubicación exacta incluida en el mapa' : 'Pulsa el botón del mapa para llegar');
+        if (note) {
+          $('#note-detail').classList.remove('hidden');
+          $('#view-note').textContent = note;
+        }
+        buildMapLinks(place, address, lat, lon);
+        updateCountdown(target);
+        if (phone) {
+          const digits = digitsOnly(phone);
+          if (digits) {
+            const whatsapp = $('#whatsapp-button');
+            const call = $('#call-button');
+            const message = `Voy de camino. Llegaré al punto de recogida de ${place} para las ${time}.`;
+            whatsapp.href = `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+            call.href = `tel:${phone.replace(/\s/g, '')}`;
+            whatsapp.classList.remove('hidden');
+            call.classList.remove('hidden');
+          }
+        }
+      }
+      $('#share-view').addEventListener('click', async () => {
+        try {
+          await shareLink(window.location.href, 'Datos de recogida');
+        } catch (error) {
+          if (!error || error.name !== 'AbortError') {
+            window.prompt('Copia este enlace:', window.location.href);
+          }
+        }
+      });
+      $('#new-pickup').addEventListener('click', () => {
+        window.location.href = canonicalBase();
+      });
+      renderViewer();
+    })();
+  </script>
+</body>
+</html>
