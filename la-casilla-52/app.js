@@ -1,7 +1,7 @@
 'use strict';
 const N=13,TARGET=52,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const RAW=window.WORDS_RAW;
-const WORDS=RAW.split('\n').map(x=>x.split('|'));
+const RAW=window.WORDS_RAW||'';
+const WORDS=RAW.split('\n').map(x=>x.split('|')).filter(x=>x[0]&&x[1]);
 const THEMES=['Ingenio y cultura','Dobles sentidos','Definiciones indirectas','Cultura general avanzada'];
 let S={grid:null,entries:[],selected:null,active:null,dir:'A',values:{},bad:new Set(),secs:0,done:false,timer:null,date:''};
 const key=(r,c)=>r+'-'+c;
@@ -10,12 +10,73 @@ function hash(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.
 function rng(seed){let x=seed||1;return()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return(x>>>0)/4294967296}}
 function shuffle(a,r){a=[...a];for(let i=a.length-1;i;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 const blank=()=>Array.from({length:N},()=>Array(N).fill(null));
-function canPlace(g,w,r,c,d,allowLoose=false){const dr=d==='D'?1:0,dc=d==='A'?1:0;if(r<0||c<0||r+dr*(w.length-1)>=N||c+dc*(w.length-1)>=N)return null;let cross=0,fresh=0;for(let i=0;i<w.length;i++){const cell=g[r+dr*i][c+dc*i];if(cell){if(cell.ch!==w[i])return null;cross++}else fresh++}if(!fresh)return null;if(!allowLoose&&!cross)return null;return{cross,fresh}}
+function canPlace(g,w,r,c,d,allowLoose=false){
+  const dr=d==='D'?1:0,dc=d==='A'?1:0;
+  if(r<0||c<0||r+dr*(w.length-1)>=N||c+dc*(w.length-1)>=N)return null;
+  const br=r-dr,bc=c-dc,ar=r+dr*w.length,ac=c+dc*w.length;
+  if(g[br]?.[bc]||g[ar]?.[ac])return null;
+  let cross=0,fresh=0;
+  for(let i=0;i<w.length;i++){
+    const rr=r+dr*i,cc=c+dc*i,cell=g[rr][cc];
+    if(cell){
+      if(cell.ch!==w[i]||cell.dirs.has(d))return null;
+      cross++;
+    }else{
+      if(d==='A'&&(g[rr-1]?.[cc]||g[rr+1]?.[cc]))return null;
+      if(d==='D'&&(g[rr]?.[cc-1]||g[rr]?.[cc+1]))return null;
+      fresh++;
+    }
+  }
+  if(!fresh||(!allowLoose&&!cross))return null;
+  return{cross,fresh};
+}
 function put(g,item,r,c,d,entries){const e={id:'e'+entries.length,answer:item[0],clue:item[1],r,c,d,cells:[]};for(let i=0;i<item[0].length;i++){const rr=r+(d==='D'?i:0),cc=c+(d==='A'?i:0);g[rr][cc]??={ch:item[0][i],entries:[],dirs:new Set()};g[rr][cc].entries.push(e.id);g[rr][cc].dirs.add(d);e.cells.push(key(rr,cc))}entries.push(e)}
 function numberPuzzle(g,entries){const starts={};for(const e of entries)starts[key(e.r,e.c)]=1;let n=0;for(let rr=0;rr<N;rr++)for(let cc=0;cc<N;cc++)if(starts[key(rr,cc)])starts[key(rr,cc)]=++n;for(const e of entries)e.num=starts[key(e.r,e.c)];entries.sort((a,b)=>a.num-b.num||(a.d>b.d?1:-1));return{g,entries}}
-function generate(date){let best=null;for(let attempt=0;attempt<90;attempt++){const r=rng(hash('la-casilla-v5:'+date)+attempt*104729),g=blank(),pool=shuffle(WORDS.filter((x,i,a)=>x[0]&&x[1]&&x[0].length<=N&&a.findIndex(y=>y[0]===x[0])===i),r),entries=[];const used=new Set();const first=pool.find(x=>x[0].length>=6)||pool[0];put(g,first,Math.floor(N/2),Math.floor((N-first[0].length)/2),'A',entries);used.add(first[0]);const tryPlace=(item,loose=false)=>{if(used.has(item[0]))return false;const opts=[];const counts={A:entries.filter(e=>e.d==='A').length,D:entries.filter(e=>e.d==='D').length};for(const d of ['A','D'])for(let sr=0;sr<N;sr++)for(let sc=0;sc<N;sc++){const fit=canPlace(g,item[0],sr,sc,d,loose);if(!fit)continue;const centre=Math.abs(sr+(d==='D'?item[0].length/2:0)-N/2)+Math.abs(sc+(d==='A'?item[0].length/2:0)-N/2);const balance=(counts[d==='A'?'D':'A']-counts[d])*14;const startTaken=entries.some(e=>e.r===sr&&e.c===sc&&e.d===d)?-90:0;opts.push({sr,sc,d,score:fit.cross*90-fit.fresh*1.5-centre+balance+startTaken+r()*5})}if(!opts.length)return false;opts.sort((a,b)=>b.score-a.score);const pick=opts[Math.floor(r()*Math.min(loose?8:4,opts.length))];put(g,item,pick.sr,pick.sc,pick.d,entries);used.add(item[0]);return true};for(let pass=0;pass<5&&entries.length<TARGET;pass++){for(const item of shuffle(pool,r)){if(entries.length>=TARGET)break;tryPlace(item,false)}}if(entries.length<TARGET){for(let pass=0;pass<4&&entries.length<TARGET;pass++)for(const item of shuffle(pool,r)){if(entries.length>=TARGET)break;tryPlace(item,true)}}if(!best||entries.length>best.entries.length)best={g,entries};if(entries.length>=TARGET)return numberPuzzle(g,entries)}return numberPuzzle(best.g,best.entries)}
+function validSeparation(g,entries){
+  for(const e of entries){
+    const dr=e.d==='D'?1:0,dc=e.d==='A'?1:0;
+    if(g[e.r-dr]?.[e.c-dc]||g[e.r+dr*e.answer.length]?.[e.c+dc*e.answer.length])return false;
+  }
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(g[r][c]){
+    const ids=g[r][c].entries.map(id=>entries.find(e=>e.id===id)).filter(Boolean);
+    if(ids.filter(e=>e.d==='A').length>1||ids.filter(e=>e.d==='D').length>1)return false;
+  }
+  return true;
+}
+function generate(date){
+  let best=null;
+  const clean=WORDS.filter((x,i,a)=>x[0]&&x[1]&&x[0].length<=N&&a.findIndex(y=>y[0]===x[0])===i);
+  for(let attempt=0;attempt<140;attempt++){
+    const r=rng(hash('la-casilla-v6:'+date)+attempt*104729),g=blank(),pool=shuffle(clean,r),entries=[],used=new Set();
+    const first=pool.find(x=>x[0].length>=6)||pool[0];
+    put(g,first,Math.floor(N/2),Math.floor((N-first[0].length)/2),'A',entries);used.add(first[0]);
+    const tryPlace=(item,loose=false)=>{
+      if(used.has(item[0]))return false;
+      const opts=[],counts={A:entries.filter(e=>e.d==='A').length,D:entries.filter(e=>e.d==='D').length};
+      for(const d of ['A','D'])for(let sr=0;sr<N;sr++)for(let sc=0;sc<N;sc++){
+        const fit=canPlace(g,item[0],sr,sc,d,loose);if(!fit)continue;
+        const centre=Math.abs(sr+(d==='D'?item[0].length/2:0)-N/2)+Math.abs(sc+(d==='A'?item[0].length/2:0)-N/2);
+        const balance=(counts[d==='A'?'D':'A']-counts[d])*12;
+        const compact=fit.cross?fit.cross*95:-18;
+        opts.push({sr,sc,d,score:compact-fit.fresh*1.5-centre+balance+r()*5});
+      }
+      if(!opts.length)return false;
+      opts.sort((a,b)=>b.score-a.score);
+      const pick=opts[Math.floor(r()*Math.min(loose?6:3,opts.length))];
+      put(g,item,pick.sr,pick.sc,pick.d,entries);used.add(item[0]);return true;
+    };
+    for(let pass=0;pass<6&&entries.length<TARGET;pass++)for(const item of shuffle(pool,r)){if(entries.length>=TARGET)break;tryPlace(item,false)}
+    if(entries.length<TARGET){
+      const shortFirst=[...pool].sort((a,b)=>a[0].length-b[0].length||r()-.5);
+      for(let pass=0;pass<6&&entries.length<TARGET;pass++)for(const item of shortFirst){if(entries.length>=TARGET)break;tryPlace(item,true)}
+    }
+    if(validSeparation(g,entries)&&(!best||entries.length>best.entries.length))best={g,entries};
+    if(entries.length>=TARGET&&validSeparation(g,entries))return numberPuzzle(g,entries);
+  }
+  return numberPuzzle(best.g,best.entries);
+}
 function answer(k){const[r,c]=k.split('-').map(Number);return S.grid[r][c]?.ch||''}
-function storeKey(){return 'laCasilla:v5:'+S.date}
+function storeKey(){return 'laCasilla:v6:'+S.date}
 function save(){localStorage.setItem(storeKey(),JSON.stringify({v:S.values,s:S.secs,d:S.done}))}
 function load(){try{const x=JSON.parse(localStorage.getItem(storeKey())||'{}');S.values=x.v||{};S.secs=x.s||0;S.done=!!x.d}catch{}}
 function render(){const b=$('#board');b.innerHTML='';for(let r=0;r<N;r++)for(let c=0;c<N;c++){const data=S.grid[r][c],el=document.createElement('div');el.className='cell'+(data?'':' block');el.dataset.k=key(r,c);if(data){const starts=S.entries.filter(e=>e.r===r&&e.c===c);if(starts.length){const n=document.createElement('span');n.className='n';n.textContent=starts[0].num;el.append(n)}const input=document.createElement('input');input.maxLength=1;input.value=S.values[key(r,c)]||'';input.readOnly=true;input.onclick=()=>pick(r,c);input.onkeydown=keys;input.setAttribute('aria-label',`Fila ${r+1}, columna ${c+1}`);el.append(input)}b.append(el)}for(const id of ['across','down'])$('#'+id).innerHTML='';for(const e of S.entries){const li=document.createElement('li');li.dataset.e=e.id;li.innerHTML='<span class="num">'+e.num+'</span><span>'+e.clue+'</span>';li.onclick=()=>selectEntry(e.id);$('#'+(e.d==='A'?'across':'down')).append(li)}const kb=$('#kbd');kb.innerHTML='';for(const l of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'){const bt=document.createElement('button');bt.textContent=l;bt.onclick=()=>type(l);kb.append(bt)}const del=document.createElement('button');del.textContent='⌫';del.className='wide';del.onclick=erase;kb.append(del)}
