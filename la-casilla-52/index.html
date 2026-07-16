@@ -11,9 +11,9 @@
 <body>
 <header class="top"><div class="brand"><span class="logo">LC</span><span><b>La Casilla</b><small>CRUCIGRAMA DIARIO</small></span></div><button id="shareTop">Compartir</button></header>
 <main>
-<section class="hero"><div><p class="eyebrow" id="date"></p><h1>El crucigrama de hoy</h1><p class="meta"><span id="theme"></span> · 13 × 13 · dificultad avanzada · 52 pistas · sin tildes · <span id="count"></span></p></div><div class="clock" id="clock">00:00</div></section>
+<section class="hero"><div><p class="eyebrow" id="date"></p><h1>El crucigrama de hoy</h1><p class="meta"><span id="theme"></span> · 13 × 13 · dificultad avanzada · objetivo ≈52 pistas · sin tildes · <span id="count"></span></p></div><div class="clock" id="clock">00:00</div></section>
 <section class="game"><div><div class="active" id="active"></div><div class="board" id="board" role="grid" aria-label="Crucigrama de 13 por 13"></div><div class="kbd" id="kbd"></div><div class="tools"><button id="check">Comprobar</button><button id="reveal">Revelar palabra</button><button id="reset">Borrar</button></div><p class="msg" id="msg"></p></div><aside class="clues"><section><h2>Horizontales</h2><ol id="across"></ol></section><section><h2>Verticales</h2><ol id="down"></ol></section></aside></section>
-<section class="foot"><h2>Un reto nuevo cada día</h2><p>La cuadrícula cambia automáticamente según la fecha local. El reto reúne alrededor de 52 respuestas entrelazadas. Las pistas emplean definiciones indirectas, dobles sentidos, gramática y referencias culturales. El progreso y el tiempo se guardan en este dispositivo.</p></section>
+<section class="foot"><h2>Un reto nuevo cada día</h2><p>La cuadrícula cambia automáticamente según la fecha local. Cada respuesta queda delimitada por el borde del tablero o por una casilla negra; las únicas casillas compartidas son cruces entre una palabra horizontal y otra vertical. El generador busca aproximarse a 52 pistas sin incumplir estas reglas. El progreso y el tiempo se guardan en este dispositivo.</p></section>
 </main>
 <dialog id="win"><p class="eyebrow">COMPLETADO</p><h2>¡Bien resuelto!</h2><p id="winText"></p><div class="share" id="result"></div><button class="primary" id="shareWin">Compartir resultado</button></dialog>
 <script src="words-b.js"></script>
