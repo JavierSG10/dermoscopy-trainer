@@ -5,18 +5,20 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5f0e7">
 <title>La Casilla · Crucigrama diario 13×13</title>
-<meta name="description" content="Crucigrama diario 13 por 13 en español, con pistas de dificultad avanzada.">
+<meta name="description" content="Crucigrama diario 13 por 13 en español, con 52 pistas de dificultad avanzada.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="top"><div class="brand"><span class="logo">LC</span><span><b>La Casilla</b><small>CRUCIGRAMA DIARIO</small></span></div><button id="shareTop">Compartir</button></header>
 <main>
-<section class="hero"><div><p class="eyebrow" id="date"></p><h1>El crucigrama de hoy</h1><p class="meta"><span id="theme"></span> · 13 × 13 · dificultad avanzada · objetivo ≈52 pistas · sin tildes · <span id="count"></span></p></div><div class="clock" id="clock">00:00</div></section>
+<section class="hero"><div><p class="eyebrow" id="date"></p><h1>El crucigrama de hoy</h1><p class="meta"><span id="theme"></span> · 13 × 13 · dificultad avanzada · 52 pistas · sin tildes · <span id="count"></span></p></div><div class="clock" id="clock">00:00</div></section>
 <section class="game"><div><div class="active" id="active"></div><div class="board" id="board" role="grid" aria-label="Crucigrama de 13 por 13"></div><div class="kbd" id="kbd"></div><div class="tools"><button id="check">Comprobar</button><button id="reveal">Revelar palabra</button><button id="reset">Borrar</button></div><p class="msg" id="msg"></p></div><aside class="clues"><section><h2>Horizontales</h2><ol id="across"></ol></section><section><h2>Verticales</h2><ol id="down"></ol></section></aside></section>
-<section class="foot"><h2>Un reto nuevo cada día</h2><p>La cuadrícula cambia automáticamente según la fecha local. Cada respuesta queda delimitada por el borde del tablero o por una casilla negra; las únicas casillas compartidas son cruces entre una palabra horizontal y otra vertical. El generador busca aproximarse a 52 pistas sin incumplir estas reglas. El progreso y el tiempo se guardan en este dispositivo.</p></section>
+<section class="foot"><h2>Un reto nuevo cada día</h2><p>La cuadrícula cambia automáticamente según la fecha local. Dos respuestas de la misma fila o columna siempre quedan separadas por al menos una casilla negra, y cada línea contiene como máximo cuatro palabras. Las únicas casillas compartidas son cruces entre una respuesta horizontal y otra vertical. El progreso y el tiempo se guardan en este dispositivo.</p></section>
 </main>
 <dialog id="win"><p class="eyebrow">COMPLETADO</p><h2>¡Bien resuelto!</h2><p id="winText"></p><div class="share" id="result"></div><button class="primary" id="shareWin">Compartir resultado</button></dialog>
+<script src="words-a.js"></script>
 <script src="words-b.js"></script>
 <script src="words-c.js"></script>
 <script src="app.js"></script>
+<script src="rules-v6.js"></script>
 </body></html>
